@@ -212,4 +212,5 @@ https://www.baeldung.com/java-comparator-comparable
 
 **Lambdas, Streams and Functional Programming**
 
-
+Lambda functions are oneline functions (short hand functions). Kind of abstract methods that are overridden in your main code
+![img.png](img.png)
