@@ -33,7 +33,7 @@ Type casting between two datatypes can happen only when following conditions are
 
 ===================================================================================================================
 
-## OOPSs
+## OOPS Fundamentals
 https://github.com/kunal-kushwaha/DSA-Bootcamp-Java/tree/main/lectures/17-oop/notes
 
 **Class :** a Class is a logical construct. It is kind of a stencil or casket based on which objects are created.
@@ -70,6 +70,10 @@ As stated earlier it is automatic process you do not have any control over it, b
 **Note:** Hashcode is not an address of object
 
 ## Access mods:
+* public
+* protected
+* private
+
 
 ### Static : 
 static methods do not need objects of a class to be created. Static vars/ methods are object independent. hence you cannot/ must not use this keywords inside constructor or methods to reference static things, use the class name instead.
@@ -193,17 +197,19 @@ https://www.baeldung.com/java-comparator-comparable
 
 
 
-Threading
+**Collection FrameWork and Generics**
 
 
 
 
-Lambda Stream and Functional Programming
+
+**Threading**
 
 
 
-JDBC and Hibernate concepts
 
 
 
-Fundamentals
+**Lambdas, Streams and Functional Programming**
+
+
