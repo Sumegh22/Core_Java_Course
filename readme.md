@@ -183,8 +183,16 @@ https://www.baeldung.com/java-comparator-comparable
   return 1;  }
   }
 
----
+------------------------------------------------------------------------------
+Similarly 
 
+class Student implements Comparator
+public int compare(Student old_st, Student new_st)   {  
+if(old_st.age==new_st.age)  
+return 0;  
+else if(old_st.age>new_st.age)  
+return 1;  }
+}
 
 ===================================================================================================================
 
@@ -197,12 +205,19 @@ https://www.baeldung.com/java-comparator-comparable
 **Lambdas, Streams and Functional Programming**
 
 Lambda functions are oneline functions (short hand functions). Kind of abstract methods that are overridden in your main code
-![img.png](img.png)
+  ![img.png](img.png)
 
 
 **Exception Handling**
 The object class is extended by Throwable, which is the root of exception handling.
-![img_1.png](img_1.png)
+  ![img_1.png](img_1.png)
+
+Error: When programs.
+
+Exception: when the normal flow of your code/ program meets with an unexpected hurdle. Which can be handled
+1. Exception can be of **Checked** type (Compile time exception) **Unchecked** (Runtime exception).
+2. To excplictly throw an exception through a method, you have to mention in the method signature that the mthod throws Exception.
+  ![img_2.png](img_2.png)
 
 **Collection FrameWork and Generics**
 
