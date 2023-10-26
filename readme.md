@@ -194,13 +194,17 @@ https://www.baeldung.com/java-comparator-comparable
 - The String class and all the wrapper classes implement the java.io.Serializable interface by default.
 - Let's see the example given below: https://www.javatpoint.com/serialization-in-java
 
+**Lambdas, Streams and Functional Programming**
+
+Lambda functions are oneline functions (short hand functions). Kind of abstract methods that are overridden in your main code
+![img.png](img.png)
 
 
+**Exception Handling**
+The object class is extended by Throwable, which is the root of exception handling.
+![img_1.png](img_1.png)
 
 **Collection FrameWork and Generics**
-
-
-
 
 
 **Threading**
@@ -208,9 +212,3 @@ https://www.baeldung.com/java-comparator-comparable
 
 
 
-
-
-**Lambdas, Streams and Functional Programming**
-
-Lambda functions are oneline functions (short hand functions). Kind of abstract methods that are overridden in your main code
-![img.png](img.png)
