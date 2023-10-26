@@ -183,8 +183,22 @@ https://www.baeldung.com/java-comparator-comparable
   return 1;  }
   }
 
----
+------------------------------------------------------------------------------
+Similarly 
 
+class Student implements Comparator
+public int compare(Student old_st, Student new_st)   {  
+if(old_st.age==new_st.age)  
+return 0;  
+else if(old_st.age>new_st.age)  
+return 1;  }
+}
+
+When to Use Which:
+
+1. Use Comparable when you want to define the default natural ordering of objects in a class. For example, if there is a clear, intrinsic way to order objects (like sorting integers or strings), implement Comparable.
+2. Use Comparator when you want to provide multiple sorting strategies for a class or when you want to sort objects based on criteria that are not intrinsic to the class. This allows you to sort objects in different ways without modifying the class itself.
+3. In summary, if you control the class and want to define the default way of sorting its objects, implement Comparable. If you want to provide different ways to sort objects of a class without modifying the class itself, use Comparator.
 
 ===================================================================================================================
 
@@ -194,17 +208,44 @@ https://www.baeldung.com/java-comparator-comparable
 - The String class and all the wrapper classes implement the java.io.Serializable interface by default.
 - Let's see the example given below: https://www.javatpoint.com/serialization-in-java
 
-**Lambdas, Streams and Functional Programming**
+## Lambdas, Streams and Functional Programming
 
 Lambda functions are oneline functions (short hand functions). Kind of abstract methods that are overridden in your main code
-![img.png](img.png)
+  ![img.png](img.png)
 
 
-**Exception Handling**
+## Exception Handling
 The object class is extended by Throwable, which is the root of exception handling.
-![img_1.png](img_1.png)
+  ![img_1.png](img_1.png)
+
+Error: When programs encounter an issue and terminate. The state of a program cannot be retained after an error is encountered.
+
+Exception: when the normal flow of your code/ program meets with an unexpected hurdle. Which can be handled
+1. Exception can be either **Checked Exception** (Compile time exception) or **Unchecked Exception** (Runtime exception).
+2. To throw an exception explicitly through a method, you have to mention in the method signature that the method throws Exception.
+
+  `static void doSomething(int a, int b) throws ArithemeticException {
+  }`
+
+3. To handle this make use of a try-catch block, try block tries to execite a particular operatn and if any error is encountered then it is
+   addressed in the catch block. the code written in finally block would execute no matter what. We can put closer of resource, in this block. 
+
+  ![img_2.png](img_2.png)
+
+## Object Clonning
+1. When we try to create one object from another using new keyword like as shown below
+`    A a = new A(x, y);
+     A b = new A (a);`
+   a clone named 'b' of object 'a' is created using 'new' and this takes a lot of processing time. All of this can be reduced object clonning
+2. To perform obkect cloning java.lang has a package has an interface called Cloneable
+3. Here Shallow copy is created by default. To make a deep copy, you have to override clone method from object class. 
+
+
 
 **Collection FrameWork and Generics**
+  ![img_3.png](img_3.png)
+
+
 
 
 **Threading**
