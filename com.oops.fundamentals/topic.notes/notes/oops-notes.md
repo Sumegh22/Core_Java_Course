@@ -211,12 +211,12 @@ When to Use Which:
 ## Lambdas, Streams and Functional Programming
 
 Lambda functions are oneline functions (short hand functions). Kind of abstract methods that are overridden in your main code
-  ![img.png](img.png)
+  ![img.png](../oops-images/img.png)
 
 
 ## Exception Handling
 The object class is extended by Throwable, which is the root of exception handling.
-  ![img_1.png](img_1.png)
+  ![img_1.png](../oops-images/img_1.png)
 
 Error: When programs encounter an issue and terminate. The state of a program cannot be retained after an error is encountered.
 
@@ -230,7 +230,7 @@ Exception: when the normal flow of your code/ program meets with an unexpected h
 3. To handle this make use of a try-catch block, try block tries to execite a particular operatn and if any error is encountered then it is
    addressed in the catch block. the code written in finally block would execute no matter what. We can put closer of resource, in this block. 
 
-  ![img_2.png](img_2.png)
+  ![img_2.png](../oops-images/img_2.png)
 
 ## Object Clonning
 1. When we try to create one object from another using new keyword like as shown below
@@ -243,7 +243,8 @@ Exception: when the normal flow of your code/ program meets with an unexpected h
 
 
 **Collection FrameWork and Generics**
-  ![img_3.png](img_3.png)
+
+![img_3.png](../oops-images/img_3.png)
 
 
 
