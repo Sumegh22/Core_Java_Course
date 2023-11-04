@@ -20,19 +20,19 @@
 
 
 
-class Task extends Thread {
+    class Task extends Thread {
 
-                   // Thread execution begins here.
-    public void run() {
-                  // performs the task i.e. prints 1500 T's
-	doTask(); 
-    }
-	
-    public void doTask() {
-        for(int i=1; i <= 1500; i++) {
-            System.out.print("T");
+          // Thread execution begins here.
+        public void run() {
+          // performs the task i.e. prints 1500 T's
+          doTask(); 
         }
-      }
+	
+        public void doTask() {
+          for(int i=1; i <= 1500; i++) {
+              System.out.print("T");
+          }
+        }
     }
 
 -----------------------------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ Here main() and Task are run using two separate threads, which means they are ex
 
 =============================================================================================================================
 
-## Designing Threads
+### Designing Threads
 
 **Thread -**
 A thread is a light weight process, it is given its own context and stack etc. for preserving the state. Thread state enables the CPU to switch back and continue from where it stopped.
@@ -154,7 +154,7 @@ There are three threads in the above program (system threads ignored). One the M
 
 =============================================================================================================================
 
-## Transform code to achieve parallelism
+### Transform code to achieve parallelism
 
 **Transforming serial code to parallel code using Threads.**
 
@@ -215,21 +215,21 @@ Note - For this program to work you need to create two files a.txt and b.txt in 
 
     public class Main {
 
-    public static void main(String[] args) throws IOException {
-		
-	String sourceFile1 = "a.txt";
-	String sourceFile2 = "b.txt";
-		
-	String destFile1 = "c.txt";
-	String destFile2 = "d.txt";
-		
-	// 1. Copy a.txt to c.txt
-	IOUtils.copyFile(sourceFile1, destFile1);
- 
-	// 2. Copy b.txt to d.txt
-	IOUtils.copyFile(sourceFile2, destFile2);
+      public static void main(String[] args) throws IOException {
+          
+        String sourceFile1 = "a.txt";
+        String sourceFile2 = "b.txt";
+            
+        String destFile1 = "c.txt";
+        String destFile2 = "d.txt";
+            
+        // 1. Copy a.txt to c.txt
+        IOUtils.copyFile(sourceFile1, destFile1);
+     
+        // 2. Copy b.txt to d.txt
+        IOUtils.copyFile(sourceFile2, destFile2);
+      }
     }
-}
 
 
 **Parallel Mode -**
@@ -288,7 +288,7 @@ Although the main thread is completed after starting the two other threads, appl
 
 ==========================================================================================================================
 
-## Executor Service
+### Executor Service
 **ExecutorService -**
 
 * In the previous example we executed the copyTask using separate threads, but there is a critical point to consider here, Thread creation is a costly activity as it includes creating a separate execution context, stack etc.. Hence we should refrain from creating too many threads. And also creating a thread for each task is not a good idea, instead we can create a pool of threads and effectively utilise them in executing all the task. This could be achieved using ExecutorService in Java. Use the execute method of the ExecutorService to submit a Runnable task, if a thread is available in the pool then it assigns this task to the thread otherwise the task is added to the blocking queue and is kept till a thread is available.
@@ -311,31 +311,31 @@ ExecutorService executor = Executors.newFixedThreadPool(5);
 
 * Modified version of previous example to use ExecutorService -
 
-    public class Main {
-
-    public static void main(String[] args) throws IOException {
-		
-	String sourceFile1 = "a.txt";
-	String sourceFile2 = "b.txt";
-		
-	String destFile1 = "c.txt";
-	String destFile2 = "d.txt";
-		
-	// Creates a fixed thread pool of size 5.
-		
-	ExecutorService executor = Executors.newFixedThreadPool(5);
-		
-	// Assume you are submitting 100 copy tasks,
-	// then executor service uses a fixed thread 
-	// pool of size 5 to execute them.
- 
-        executor.execute(new CopyTask(sourceFile1, destFile1));
-	executor.execute(new CopyTask(sourceFile2, destFile2));	
-    }
-}
+      public class Main {
+  
+        public static void main(String[] args) throws IOException {
+            
+          String sourceFile1 = "a.txt";
+          String sourceFile2 = "b.txt";
+              
+          String destFile1 = "c.txt";
+          String destFile2 = "d.txt";
+              
+          // Creates a fixed thread pool of size 5.
+              
+          ExecutorService executor = Executors.newFixedThreadPool(5);
+              
+          // Assume you are submitting 100 copy tasks,
+          // then executor service uses a fixed thread 
+          // pool of size 5 to execute them.
+       
+              executor.execute(new CopyTask(sourceFile1, destFile1));
+          executor.execute(new CopyTask(sourceFile2, destFile2));	
+        }
+  }
 ===================================================================================================================
 
-## Stopping Thread in the middle
+### Stopping Thread in the middle
 
 **Stopping threads in the middle -**
 * stop() method of the Thread class could be used to stop the thread in the middle. But this is the dangerous thing to do as it leaves the system in inconsistent state, because we are not giving the opportunity to the thread to rollback or reverse the actions that it has taken. And hence the stop method is deprecated and should not be used.
@@ -402,31 +402,566 @@ sleep() method -
 sleep() method of the thread class is used to block the thread for the given time interval in milliseconds. This method throws InterruptedException if the thread is interrupted while it is in sleep.
 
 ========================================================================================================================
-## Thread States
+### Thread States
 
 **Thread States -**
-A thread can be in one of the following states:
+  A thread can be in one of the following states:
 
-* NEW:
+**NEW:**
   A thread that is created but not yet started is in this state.
 
-* RUNNABLE:
+**RUNNABLE:**
   A thread executing in the Java virtual machine is in this state, internally we can think of it as a combination of two sub states Ready and Running, i.e. when you start the thread it comes to Ready state and wait for the CPU, and if CPU is allocated then it goes into Running state. Once allocated CPU time is completed, in other words when the Thread schedular suspends the thread then it goes back to the Ready state and waits for its turn again.
 
-* The yield() method instructs the thread schedular to pass the CPU to other waiting thread if any.
+* The yield() method instructs the thread scheduler to pass the CPU to other waiting thread if any.
 
-* BLOCKED:
+**BLOCKED:**
   A thread is blocked if it is waiting for a monitor lock is in this state. Refer synchronized methods and blocks.
 
-* WAITING
+*** WAITING:**
   A thread that is waiting indefinitely for another thread to perform a particular action is in this state. Refer wait(), join()
 
-* TIMED_WAITING
+**TIMED_WAITING**
   A thread that is waiting for another thread to perform an action for up to a specified waiting time is in this state. Refer wait(millis), join(millis)
 
-* TERMINATED
+**TERMINATED**
   A thread that has exited i.e. it has either completed its task or terminated in the middle of the execution.
 
 
-* yield() method -
+![thread-states.jpeg](..%2Fthreading-images%2Fthread-states.jpeg)
+
+**yield() method -**
   yield() method is important in few scenarios, suppose a thread is given 5 min of CPU time, now after a minute thread knows that it doesn't need the CPU anymore with in that time period, in such scenarios do you think that blocking the CPU for the next four minutes is a good idea ? No, it is better to pass on the control to the threads if any waiting for CPU and that is when we can use the yield() method. Usage Thread.yield(), it is a static method of the Thread class and it affects the current thread from which the method is invoked.
+
+========================================================================================================================
+
+### Thread Priorities
+Let us look at how we can change the thread priorities.
+
+Thread priorities range between 1 and 10.
+
+* MIN_PRIORITY - 1 being the minimum priority
+
+* NORM_PRIORITY - 5 is the normally priority, this is the default priority value.
+
+* MAX_PRIORITY - 10 being the max priority.
+
+**setPriority(int newPriority)  -**
+  A method in the Thread class, this is used to set the new priority for the thread. If the newPriority value is more than the maximum priority allowed for the group then maximum priority is considered, i.e. if you try to set 15 then it takes only 10. And for a given ThreadGroup if the maximum allowed priority is 7 then any thread with in that group can have a maximum of 7.
+
+Example -
+Just think about a software installer app, the thread that copies the files should be given more priority than the thread which display the progress etc, that speeds up the installation process. Below example demonstrates setting higher priority for copyThread.
+
+    class CopyTask implements Runnable {
+      @Override
+      public void run() {
+        while(true) {
+        System.out.print("C");
+        }
+      }
+    }
+
+    class ProgressTask implements Runnable {
+      @Override
+      public void run() {
+        while(true) {
+        System.out.print("-");
+        }
+      }
+    }
+
+    public class Main {
+
+      public static void main(String[] args) {
+        CopyTask copyTask = new CopyTask();
+        Thread copyThread = new Thread(copyTask);
+        copyThread.setPriority(Thread.NORM_PRIORITY + 3);
+        copyThread.start();
+            
+        ProgressTask progressTask = new ProgressTask();
+        Thread progressThread = new Thread(progressTask);
+        progressThread.start();
+      }
+    }
+========================================================================================================================
+
+### Internal System Threads and ThreadGroup
+
+Thread.currentThread() -
+
+currentThread() is a static method in the class Thread and all the static method in the Thread class normally operate on the thread in which it is being executed. Here Thread.currentThread() returns a reference to the current thread i.e. the main thread.
+
+getThreadGroup() - [Thread class method]
+
+A Thread class method that returns a reference to the ThreadGroup to which the corresponding thread instance belongs.
+
+getParent() - [ThreadGroup class method]
+
+A ThreadGroup class method that returns a reference to the parent thread group if any. If there is no parent then this method returns null.
+
+setMaxPriority(int maxPriority) - [ThreadGroup class method]
+
+Sets the maximum priority for that group so that no thread can exceed this priority with in the group.
+
+Example - 
+
+      public class Main {
+      
+            public static void main(String[] args) {
+            System.out.println("System threads..........");
+            Thread thr = Thread.currentThread();
+            ThreadGroup grp = thr.getThreadGroup();
+            while (grp.getParent() != null) {
+                grp = grp.getParent();
+            }
+            grp.list();
+            }
+      }
+
+**Sample Output -**
+NOTE - OUTPUT MAY VARY WITH JAVA VERSION.
+
+System threads..........
+java.lang.ThreadGroup[name=system,maxpri=10]
+Thread[Reference Handler,10,system]
+Thread[Finalizer,8,system]
+Thread[Signal Dispatcher,9,system]
+java.lang.ThreadGroup[name=main,maxpri=10]
+Thread[main,5,main]
+Associating a Thread with ThreadGroup -
+Straight forward, create an instance of the ThreadGroup and give it a name. You can do group level operations over the ThreadGroup object. To associate a thread with the thread group, pass the thread group reference to the Thread class constructor.
+
+Example -
+
+    class MyTask implements Runnable {
+    
+        @Override 
+        public void run() {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        }
+    }
+
+    public class Main {
+    
+        public static void main(String[] args) {
+            
+        // CREATING A THREADGROUP
+        ThreadGroup myGroup = new ThreadGroup("MyGroup");
+        myGroup.setMaxPriority(4);
+            
+        // ASSOCIATING A THREAD WITH THREAD GROUP
+        Thread myThread = new Thread(myGroup, new MyTask(), "DemoThread");
+        myThread.start();
+        
+        System.out.println("System threads..........");
+        Thread thr = Thread.currentThread();
+        ThreadGroup grp = thr.getThreadGroup();
+        while (grp.getParent() != null) {
+            grp = grp.getParent();
+        }
+        grp.list();	
+        }
+    }
+
+**Sample Output -**
+System threads..........
+java.lang.ThreadGroup[name=system,maxpri=10]
+Thread[Reference Handler,10,system]
+Thread[Finalizer,8,system]
+Thread[Signal Dispatcher,9,system]
+java.lang.ThreadGroup[name=main,maxpri=10]
+Thread[main,5,main]
+java.lang.ThreadGroup[name=MyGroup,maxpri=4]
+Thread[DemoThread,4,MyGroup]
+
+**Technical Note -**
+It is important to note that even the main method runs with a thread called the main thread. And its default priority is 5.
+
+========================================================================================================================
+
+### Daemon Threads
+Daemon threads are the ones which does not prevent the JVM from exiting the application once it finishes. Daemon threads are handy for performing background tasks such as garbage collection or collecting application statistics etc. Note that the Java Virtual Machine exits when the only threads running are all daemon threads.
+
+Example -
+In the below example at the end of the while loop grp will point to system thread group. And enumerate method lists the threads in that group and copies the references to the given array. It also returns the number of threads copied. And later I am printing the thread name along with the boolean value checking if it is a daemon thread or not, using the method isDaemon().
+
+    public class Main1 {
+    
+        public static void main(String[] args) {
+            
+          System.out.println("System threads..........");
+              
+          Thread thr = Thread.currentThread();
+          ThreadGroup grp = thr.getThreadGroup();
+          while (grp.getParent() != null) {
+              grp = grp.getParent();
+          }
+              
+          Thread [] threads = new Thread[10];
+          int n = grp.enumerate(threads);
+              
+          for (int i=0; i < n; i++) {
+              System.out.println(
+              "Thread Name: " + threads[i].getName() + 
+              " ; isDaemon: " + threads[i].isDaemon());
+          }
+        }
+    }
+
+Output -
+System threads..........
+Thread Name: Reference Handler ; isDaemon: true
+Thread Name: Finalizer ; isDaemon: true
+Thread Name: Signal Dispatcher ; isDaemon: true
+Thread Name: main ; isDaemon: false
+You can see that Reference Handler, Finalizer, Single Dispatcher all these are daemon threads because they run the background and they doesn't stop the application from exiting.
+
+setDaemon(boolean on) -
+The method of the Thread class makes a enables us to set whether a thread is a daemon thread or user thread.
+
+Example -
+    
+    class MyTask implements Runnable {
+        
+            @Override
+            public void run() {
+            for (;;) {
+                System.out.print("T");
+            }
+            }
+    }
+
+    public class Main {
+      public static void main(String[] args) {
+          Thread thr = new Thread(new MyTask());
+          thr.setDaemon(true);
+          thr.start();
+      
+          for (int i=1; i <= 200; i++) {
+              System.out.print(" M ");
+          }
+      }
+    }
+Output -
+MMTTMMT
+
+A combination of M and T but the application ends once the main ends.
+
+========================================================================================================================
+### Callable Task
+
+**Callable interface -**
+Unlike Runnable, Callable interface allows us to create an asynchronous task which is capable of returning an Object.
+
+interface Callable<V> {
+V call() throws Exception;
+}
+If you implement Runnable interface we can not return any result. But if you implement Callable interface then you can return the result as well. Like run() method in the Runnable interface, you need to override the call() method. The return type of the call() method should match with the intended return type of the result. Callable<Double> means the call method returns Double value,  Callable<Fruit> means call method returns an instance of type Fruit.
+
+    class GetStockQuoteTask implements Callable<Double> {
+      private String stockSymbol;
+   
+      public GetStockQuoteTask(String stockSymbol) {
+        this.stockSymbol = stockSymbol;
+      }
+   
+      public Double call() {
+        // Write some logic to fetch the stock price
+        // for the given symbol and return it.
+        return 0.0;
+      }
+    }
+To submit this task for execution, you can use the submit method on the ExecutorService.
+
+String symbol = "ABCD";
+GetStockQuoteTask task = new GetStockQuoteTask(symbol);
+Future<Double> future = executor.submit( task );
+Double price = future.get();
+
+
+Future Object -
+When you submit a Callable task to the ExecutorService, it returns a Future object. This object enables us to access the request and check for the result of the operation if it is completed.
+
+Important methods -
+
+isDone() - Returns true if the task is done and false otherwise.
+
+get() - Returns the result if the task is done, otherwise waits till the task is done and then it returns the result.
+
+cancel(boolean mayInterrupt) - Used to stop the task, stops it immediately if not started, otherwise interrupts the task only if mayInterrupt is true.
+
+
+
+Example -
+
+      
+      import java.util.concurrent.Callable;
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.Executors;
+      import java.util.concurrent.Future;
+      
+      class MyMath {
+      public static int add(int a, int b) {
+      return a + b;
+      }
+      }
+
+    public class Main {
+
+      public static void main(String[] args) throws Exception {
+      
+        int x = 10;
+        int y = 20;
+            
+        ExecutorService executor = 
+                    Executors.newFixedThreadPool(1);
+        
+            // Submit a Callable task and use the Future
+            // object to fetch the result.	
+        Future<Integer> future = 
+                        executor.submit(
+                              new Callable<Integer>() {
+                                public Integer call() {
+                                    return MyMath.add(x, y);
+                                }
+                               }
+                        );
+     
+         // do some parallel task
+         // Inefficient to simply wait,
+             // instead you can release the CPU 
+             // by calling Thread.yield() inside 
+             // the while loop.	
+         while( ! future.isDone())
+            ; // wait
+        
+             // fetch the result 	
+         int z = future.get();
+            
+         System.out.println( "Result is " + z );
+      }
+    }
+========================================================================================================================
+
+### Notes - Pattern Search in folder
+**Pattern Finder Example -**
+
+
+    package com.example.utils;
+    
+    import java.io.BufferedReader;
+    import java.io.File;
+    import java.io.FileReader;
+    import java.util.ArrayList;
+    import java.util.List;
+    
+    // Below utility searches the given pattern in the file.
+
+      public class PatternFinder {
+    
+      /*
+      * Looks for the given pattern in the file,
+      * and returns the list of line numbers
+      * in which the pattern is found.
+      */
+
+        public List<Integer> find(File file, String pattern) {
+    
+        List<Integer> lineNumbers = new ArrayList<Integer>();
+    
+      // Open the file for reading.
+      try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+    
+          int lineNo = 1;
+          String line;
+    
+          // for each line in the file.
+          while ( (line = br.readLine()) != null) {
+    
+        if (line.contains(pattern)) {
+            // capture the lineNo where the pattern is found.
+            lineNumbers.add(lineNo);
+        }
+    
+        lineNo++;
+          }
+    
+      } catch(Exception e) {
+      e.printStackTrace();
+      }
+    
+      // Just introduced the delay for demo.
+      try { Thread.sleep(1000); } catch(Exception e) {}
+    
+      return lineNumbers;
+      }
+    
+    }
+
+
+**Note -** For this program to work, create a folder named "sample" under "src" folder and create few files with content with in "sample" folder.
+
+
+
+**Serial approach -**
+Here we are not using threads, instead we are searching each file in sequential order.
+
+    import java.io.File;
+    import java.util.HashMap;
+    import java.util.List;
+    import java.util.Map;
+    import java.util.Set;
+    
+    import com.example.utils.PatternFinder;
+    
+    public class Main {
+
+    public static void main(String[] args) throws Exception {
+	
+        // pattern to search
+        String pattern = "public";
+	       
+        // Directory or folder to search	
+	File dir = new File("./src/sample");
+ 
+	// list all the files present in the folder.
+	File [] files = dir.listFiles();
+		
+	PatternFinder finder = new PatternFinder();
+		
+	long startTime = System.currentTimeMillis();
+		
+	// for each file in the list of files
+ 
+	for (File file : files) {
+ 
+	    List<Integer> lineNumbers = finder.find(file, pattern);
+ 
+	    if (! lineNumbers.isEmpty()) {
+		System.out.println(
+                    pattern + "; found at " + lineNumbers + 
+                    " in the file - " + file.getName());
+	    }
+			
+	}
+        	
+	System.out.println(
+            " Time taken for search - " + (System.currentTimeMillis() - startTime));
+		
+    }
+    }
+
+
+**Parallel approach -**
+Here we are creating a fixed thread pool of size 3 and using it to search the files, so that we can scan 3 files in parallel. And taking the help of the Future object to return the search result.
+
+
+
+    import java.io.File;
+    import java.util.HashMap;
+    import java.util.List;
+    import java.util.Map;
+    import java.util.Set;
+    import java.util.concurrent.Callable;
+    import java.util.concurrent.ExecutorService;
+    import java.util.concurrent.Executors;
+    import java.util.concurrent.Future;
+    
+    import com.example.utils.PatternFinder;
+    
+    public class Main {
+
+    public static void main(String[] args) throws Exception {
+		
+        String pattern = "public";
+		
+        File dir = new File("./src/sample");
+	File [] files = dir.listFiles();
+		
+	PatternFinder finder = new PatternFinder();
+		
+	// Fixed thread pool of size 3.
+	ExecutorService executor = Executors.newFixedThreadPool(3);
+ 
+	// Map to store the Future object against each 
+	// file search request, later once the result is obtained 
+	// the Future object will be 
+	// replaced with the search result.
+ 
+	Map<String, Object> resultMap = new HashMap<String,Object>();
+		
+	long startTime = System.currentTimeMillis();
+		
+	for (File file : files) {
+		
+	    // Submit a Callable task for the file.
+	    Future<List<Integer>> future = 
+		executor.submit(
+		    new Callable<List<Integer>>() {
+			public List<Integer> call() {
+			    List<Integer> lineNumbers = finder.find(file, pattern);
+			    return lineNumbers;
+			}
+		    });
+			
+	    // Save the future object in the map for 
+	    // fetching the result.
+ 
+	    resultMap.put(file.getName(), future);
+	}
+		
+	// Wait for the requests to complete.
+	waitForAll( resultMap );
+		
+	// Display the result.
+	for (Map.Entry<String, Object> entry : resultMap.entrySet()) {
+		System.out.println( 
+                    pattern + " found at - " + entry.getValue() + 
+                    " in file " + entry.getKey());
+	}
+		
+		
+	System.out.println(
+            " Time taken for search - "  
+            + (System.currentTimeMillis() - startTime));
+		
+    }
+ 
+    private static void waitForAll(Map<String, Object> resultMap) 
+                            throws Exception {
+		
+	Set<String> keys =  resultMap.keySet();
+		
+	for (String key : keys) {
+	    Future<List<Integer>> future = 
+                    (Future<List<Integer>>) resultMap.get(key);
+ 
+	    while (! future.isDone()) {
+ 
+		// Passing the CPU to other 
+		// threads so that they can 
+		// complete the operation.
+                // With out this we are simply 
+                // keeping the CPU in loop and 
+                // wasting its time.
+ 
+		Thread.yield(); 
+	    }
+ 
+	    // Replace the future object with the obtained result.
+	    resultMap.put(key, future.get());
+	}
+		
+    }
+    }
+
+
+IMPORTANT NOTE - If a thread doesn't need CPU, it is always a good idea to pass the control to the other threads so that CPU time is effectively utilized.
+
+========================================================================================================================
+
+
