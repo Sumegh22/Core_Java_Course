@@ -1232,3 +1232,206 @@ You can see that list object is locked by Thread1 and hence even when the contro
 So when it comes to synchronizing operations synchronized blocks are always better choice over synchronized methods.
 
 ==============================================================================================================================================================
+
+### Deadlocks and solution with lock sequencing
+
+**Deadlock -**
+Two threads are said to be in a deadlock when both the threads are circularly waiting for a lock over the object and hence they both get into a situation where they can not proceed with the execution.
+
+
+Assume that for a writer to write lock should be acquired on both the Book and the Pen. And also assume there is only one instance of the book and the pen is available. In that case assume that writer1 acquires lock over the book object and writer 2 acquires lock over the pen object. Now writer1 is waiting for the pen and writer2 is waiting for the book, and they both are deadlocked.
+
+Simulated Example -
+
+    class Writer1 extends Thread {
+    
+        Object book;
+        Object pen;
+        
+        public Writer1(Object book, Object pen) {
+        this.book = book;
+        this.pen = pen;
+        }
+        
+        @Override
+        public void run() {
+            
+        synchronized(book) {
+            try { Thread.sleep(10); } catch(Exception e) {}
+            synchronized(pen) {
+            System.out.println("Writer1 writing");
+            }
+        }	
+        }
+    }
+
+    class Writer2 extends Thread {
+    
+        Object book;
+        Object pen;
+        
+        public Writer2(Object book, Object pen) {
+        this.book = book;
+        this.pen = pen;
+        }
+        
+        @Override
+        public void run() {
+            
+        synchronized(pen) {
+            try { Thread.sleep(10); } catch(Exception e) {}
+            synchronized(book) {
+            System.out.println("Writer2 writing");
+            }
+        }	
+        }
+    }
+
+    public class Main {
+    
+        public static void main(String[] args) {	
+        Object book = new Object();
+        Object pen = new Object();
+            
+        new Writer1(book, pen).start();
+        new Writer2(book, pen).start();
+            
+        System.out.println("Main is done");
+        }
+    }
+
+**Solution -**
+
+Lock sequencing is one possible solution for deadlock avoidance. Adjust the lock sequence for Writer2
+
+    @Override
+    public void run() {
+      synchronized(book) {
+          try { Thread.sleep(10); } catch(Exception e) {}
+        synchronized(pen) {
+          System.out.println("Writer2 writing");
+        }
+      }
+    }
+
+===============================================================================================================
+
+### Reentrant Locks
+
+**Read/Write Lock -**
+Read/Write Lock gives us more flexibility during locking and unlocking. Based on the type of operation being performed over the object we can segregate the locks into
+
+1) readLock
+
+2) writeLock
+
+readLock allows us to lock the object for read operation, and the interesting point is that the read operation can be shared i.e if two threads are waiting for readLock then both of them can proceed forward with the operation as read operation doesn't change the data.
+
+Whereas writeLock is mutually exclusive i.e. if a writeLock is accepted then all the other lock requests should wait till the thread that owns the lock releases it.
+
+For example let us assume the following chronologically ordered lock requests
+
+T1 -> lock.readLock();
+
+T2 -> lock.readLock();
+
+T3 -> lock.readLock();
+
+T4 -> lock.writeLock();
+
+T5 -> lock.readLock();
+
+Here T1, T2, T3 can share the readLock and proceed forward with the operation.  Where T4 should wait till T1, T2 and T3 unlocks.
+
+Why T5 is waiting ?
+
+* Because writeLock is requested by T4 before its request and hence all subsequent requests to read/write locks should wait.
+
+* This is in contrast to synchronized methods/blocks because for synchronized method/block there is no segregation of read and write operations. Object is locked no matter whether it is read or write.
+
+* Caution - It is always better to put the unlock operation in finally, as you need to unlock irrespective of exceptions.
+
+**Example -**
+Example is just for demo, hence lock/unlock operations are kept in incr() method itself. They can be added to getX() and setX() operations as well.
+
+    import java.util.concurrent.locks.Lock;
+    import java.util.concurrent.locks.ReadWriteLock;
+    import java.util.concurrent.locks.ReentrantReadWriteLock;
+    
+    class Sample {
+    
+        private int x;
+        
+        // ReadWriteLock object for requesting the lock.
+        ReadWriteLock rw_lock = new ReentrantReadWriteLock();
+     
+        public int getX() {
+            return x;
+        }
+     
+        public void setX(int x) {
+        this.x = x;
+        }
+        
+        public void incr() {
+            
+        // Request the write lock as the 
+        // operation is intended to modify the data.
+     
+        Lock lock = rw_lock.writeLock();
+        lock.lock();
+     
+        try {
+            
+            int y = getX();
+            y++;
+                
+            // Just for simulation
+            try { Thread.sleep(1); } catch(Exception e) {}
+                
+            setX(y);
+     
+        } finally {
+            // Unlock 
+            lock.unlock();
+        }	
+        }
+    
+    }
+
+    class MyThread extends Thread {
+    
+        Sample obj;
+        
+        public MyThread(Sample obj) {
+        this.obj = obj;
+        }
+        
+        public void run() {
+        obj.incr();
+        }	
+    }
+
+    public class Main {
+    
+        public static void main(String[] args) {
+     
+        Sample obj = new Sample();
+        obj.setX(10);
+            
+        MyThread t1 = new MyThread(obj);
+        MyThread t2 = new MyThread(obj);
+            
+        t1.start();
+        t2.start();
+            
+        try {
+            t1.join();
+            t2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+            
+        System.out.println( obj.getX() );	
+        }
+    }
