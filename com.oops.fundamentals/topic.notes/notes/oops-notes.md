@@ -249,8 +249,4 @@ Exception: when the normal flow of your code/ program meets with an unexpected h
 
 
 
-**Threading**
-
-
-
 
