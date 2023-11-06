@@ -242,9 +242,7 @@ Exception: when the normal flow of your code/ program meets with an unexpected h
 
 
 
-**Collection FrameWork and Generics**
-
-![img_3.png](../oops-images/img_3.png)
+**Next Topic Collection FrameWork and Generics**
 
 
 
