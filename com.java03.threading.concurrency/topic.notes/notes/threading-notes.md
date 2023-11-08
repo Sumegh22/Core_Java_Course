@@ -1570,3 +1570,506 @@ There are different ways of solving it, one approach is to ask the producer to w
 * **main()** initiates these operations, by creating the MessageQueue object and passing it to both the producer and consumer threads.
 
 ================================================================================================================
+
+### ThreadLocal
+
+**ThreadLocal -**
+ThreadLocal is considered an anti-pattern please refrain from using it directly.
+
+ThreadLocal allows us to associate an object with the Thread. It is normally used to hold the information which should be accessible anywhere during the thread execution.
+
+**Important Methods -**
+get() - Returns the value associated with the thread.
+
+set(T value) - Associates the value with the thread.
+
+remove() - Removes the value associated with the thread.
+
+
+
+**SimulatedExample -**
+Assume we have two requests, and we assigned two WorkerThreads for servicing them, think that this is a server application assigning a client request to a thread. Now inside the WorkerThread assume that the request is delegated to the framework. And Framework does the pre-processing. During the pre-processing step think that it extracts the user information from the request and sets up the UserContext. The setUserName operation sets the userName in the ThreadLocal object. And then it forwards the request to the API. Assume API calls the services Service1 and Service2, and in between with a delay.Now assume Service1 want to know the user information then it can use the UserContext.getUserName() which retrieves the userName from the thread local object.
+
+And the most important thing is that once the task is done, we need to clear this value. The postProcess step will clear the context i.e. It removes the value associated with the current Thread. May not be important for this example, but in normal applications the same thread is used to service multiple client request, if not cleared the existing value associated with the thread might interfere with some other client request.
+
+    public class Main {
+    
+        public static void main(String[] args) {
+        String request1 = "a";
+        String request2 = "b";
+            
+        new WorkerThread(request1).start();
+        new WorkerThread(request2).start();
+        }
+    }
+
+    class UserContext {
+    private static ThreadLocal<String> userInfoThreadLocal =
+    new ThreadLocal<String>() {
+    public String initialValue() {
+    return null;
+    }
+    };
+    
+        public static String getUserName() {
+            return userInfoThreadLocal.get();
+        }
+        
+        public static void setUserName(String userName) {
+        userInfoThreadLocal.set(userName);
+        }
+        
+        public static void clear() {
+        userInfoThreadLocal.remove();
+        }
+    }
+
+    class WorkerThread extends Thread {
+    
+        String request;
+        Framework framework = new Framework();
+        
+        public WorkerThread(String request) {
+        this.request = request;
+        }
+        
+        @Override 
+        public void run() {
+        framework.delegate(request);
+        }
+    }
+
+    class Framework {
+    
+        API api = new API();
+        
+        public void delegate(String request) {
+        preProcess(request);
+        try {
+            api.process(request);
+        } finally {
+            postProcess();
+        }
+        }
+     
+        private void preProcess(String request) {
+        String userName = getUserName(request);
+        UserContext.setUserName(userName);
+        }
+        
+        private void postProcess() {
+        UserContext.clear();
+        }
+     
+        private String getUserName(String request) {
+        return request;
+        }
+    }
+
+    class API {
+    
+        Service1 service1 = new Service1();
+        Service2 service2 = new Service2();
+        
+        public void process(String request) {
+        service1.doService1();
+        sleep();
+        service2.doService2();
+        }
+     
+        private void sleep() {
+        try { 
+            Thread.sleep(3000); 
+        } catch(InterruptedException e) {}
+        }
+    }
+
+    class Service1 {
+    
+        public void doService1() {
+        System.out.println(
+            "Performing service1 for user - " 
+            + UserContext.getUserName() 
+            + " "  + Thread.currentThread());
+        }
+    }
+
+    class Service2 {
+    
+        public void doService2() {
+        System.out.println(
+            "Performing service2 for user - " 
+            + UserContext.getUserName() 
+            + " "  + Thread.currentThread());
+        }
+    }
+Output -
+
+You can see in the output that Thread-0 and Thread-1 has different usernames as each thread has its own copy of the userName.
+
+Performing service1 for user - b Thread[Thread-1,5,main]
+Performing service1 for user - a Thread[Thread-0,5,main]
+Performing service2 for user - b Thread[Thread-1,5,main]
+Performing service2 for user - a Thread[Thread-0,5,main]
+Summary -
+
+ThreadLocal could be used to supply some vital information to all the components involved in processing the request, where this could not be passed directly. But it considered an anti-pattern and creates trouble during asynchronous processing if not handled properly.
+
+=================================================================================================================
+
+### BlockingQueue and revised producer and consumer problem
+
+#### java.util.concurrent package
+Has several utilities which help developing multithreaded application.
+
+* ExecutorService
+
+* Callable interface
+
+* Future object
+
+* Locks
+
+* BlockingQueue implementations
+
+* Few other utilities.
+
+BlockingQueue
+BlockingQueue is an interface that extends Queue interface. And the implementations include
+
+ArrayBlockingQueue
+
+It is bounded i.e. you need to specify the size.
+
+operate on FIFO logic i.e. first in first out, which means that the first inserted element will be the first to be removed.
+
+
+
+LinkedBlockingQueue
+
+Optionally Bounded, based on linked nodes i.e. nothing but the linked list.
+
+It too operates on FIFO logic.
+
+
+
+PriorityBlockingQueue
+
+Unbounded
+
+Objects should be Comparable or you should provide a Comparator.
+
+
+
+And there are few other implementations as well.
+
+**BlockingQueue operations**
+Operations that throw Exception if the operation fails.
+
+add(o)
+
+It tries to add an element and if there is no sufficient capacity available this method will throw an exception.
+
+remove(o)
+
+Removes the element that matches with the given object it compares the elements using equals method.
+
+element()
+
+Returns the head element with out removing it. But element() method throws an exception if queue is empty
+
+Operations that return a boolean value with out exception
+
+offer(o)
+
+Returns true if the element is added otherwise false.
+
+poll()
+
+Removes the head element of the queue and returns it, if queue is empty it returns null.
+
+peek()
+
+Returns the head element with out removing it, it returns null if queue is empty.
+
+Operations that block.
+
+put(o)
+
+It will add the element to the queue, but if the queue is full, then it will block the thread till the space is available.
+
+take()
+
+Returns the head element of the queue, if queue is empty this method will block the thread till an element is available.
+
+And the methods with timeout
+
+offer(o, timeout, timeunit)
+
+poll(timeout, timeunit)
+
+**Revised Producer and Consumer Example -**
+
+    import java.util.concurrent.ArrayBlockingQueue;
+    import java.util.concurrent.BlockingQueue;
+    
+    // Changed from MessageQueue to BlockingQueue.
+
+    class ProducerThread extends Thread {
+    BlockingQueue<String> queue;
+    
+        public ProducerThread(BlockingQueue<String>  queue) {
+        this.queue = queue;
+        }
+        
+        @Override
+        public void run() {
+        for(int i=1; i <= 10; i++) {
+            String msg = "Hello-" + i;
+                
+                // Blocks the thread until the space is available.
+            try {
+            queue.put(msg);
+                    System.out.println("Produced - " + msg);
+            } catch (InterruptedException e) {
+            e.printStackTrace();
+            }
+           
+        }
+        }
+    }
+
+    class ConsumerThread extends Thread {
+    BlockingQueue<String> queue;
+    
+        public ConsumerThread(BlockingQueue<String> queue) {
+        this.queue = queue;
+        }
+        
+        @Override
+        public void run() {
+              for(int i=1; i<=10; i++) {
+                String message = null;
+         
+                    // Blocks the thread until the element is available.
+                try {
+                message = queue.take();
+                        System.out.println("Consumed - " + message);
+                } catch (InterruptedException e) {
+                e.printStackTrace();
+                }
+              
+              }
+        }
+    }
+
+    public class Main {
+      public static void main(String[] args) throws InterruptedException {
+        BlockingQueue<String> queue = new ArrayBlockingQueue<String>(1);
+        new ProducerThread(queue).start();
+        new ConsumerThread(queue).start();
+      }
+    }
+
+
+=================================================================================================================
+
+## PriorityBlockingQueue
+
+**PriorityBlockingQueue -**
+PriorityBlockingQueue orders the elements through natural order if they are Comparable or we should use the Comparator.
+
+**Example -**
+
+    import java.util.Comparator;
+    import java.util.concurrent.PriorityBlockingQueue;
+    
+    class Student {
+    String name;
+    int rank;
+    
+        public Student(String name, int rank) {
+            this.name = name;
+        this.rank = rank;
+        }
+        
+        public int getRank() {
+        return this.rank;
+        }
+        
+        public String toString() {
+        return String.format("name : %s, rank : %d", name, rank);
+        }
+    }
+
+    // Compares the Student objects based on the rank field value.
+  
+    class StudentComparator implements Comparator<Student> {
+    @Override
+    public int compare(Student o1, Student o2) {
+    return o1.getRank() - o2.getRank();
+    }
+    }
+
+    public class Main {
+    
+        public static void main(String[] args) {
+        PriorityBlockingQueue<Integer> queue = new PriorityBlockingQueue<Integer>();
+        queue.add(10);
+        queue.add(2);
+        queue.add(5);
+            
+        System.out.println(queue.poll());
+        System.out.println(queue.poll());
+        System.out.println(queue.poll());
+            
+        PriorityBlockingQueue<Student> queue1 = 
+            new PriorityBlockingQueue<Student>(5, new StudentComparator());
+     
+        queue1.add(new Student("a", 12));
+        queue1.add(new Student("b", 1));
+        queue1.add(new Student("c", 4));
+            
+        System.out.println(queue1.poll());
+        System.out.println(queue1.poll());
+        System.out.println(queue1.poll());
+        }
+    }
+    
+**Output -**
+    
+    2
+    5
+    10
+    name : b, rank : 1
+    name : c, rank : 4
+    name : a, rank : 12
+
+=================================================================================================================
+
+## Fork Join Framework
+
+Fork Join Framework -Available from Java7
+
+An ExecutorService for ForkJoinTasks
+
+It differs from ExecutorService by virtue of employing Work-stealing. i.e. if a worker thread has no tasks in the pipeline it will take the task from the task queue of the other busy thread so that the workload is efficiently balanced.
+
+To access the pool, A static common pool is available for the application and it can be accessed through commonPool() method of the ForkJoinPool class. Using the commonPool is the preferred approach because creating multiple thread pools might have an adverse impact on the performance of the application.
+
+ForkJoinPool pool = ForkJoinPool.commonPool();
+
+For applications which need separate thread pools, we can construct the ForkJoinPool using the level of parallelism needed and by default it is equal to the number of processors.
+
+**ForkJoinPool pool = new ForkJoinPool();**
+
+------------------------------------------------------------------------------------------------------------
+
+**What is fork, join ?**
+
+The primary thought process behind fork is that each task is recursively split into subtasks and executed in parallel where as the join operation will wait for the completion of the task and combines the obtained results. To make it simpler, lets assume that the task is to search 100,000 unordered elements and returns the number of occurrences of an element. Assume that, a task will perform the search operation on its own if the list size is 25000. Here the first tasks splits the total elements into two sets of size 50000  and at second level task will split that into two sets of size 25000 each,  and at this level it will not fork any subtasks because the size of the dataset is 25000 and as per our condition we shouLd not create sub tasks.
+
+This is how recursion works as well, there will be a base condition and upon reaching that condition recursive call would be stopped. Similarly here we should put a threshold condition where we will not further fork.
+
+Types of ForkJoinTask(s) -
+
+ForkJoinTask implements Future interface so we can use it to extract the results once the task is done. ForkJoinTask is further divided into two subtypes one is RecursiveAction and RecursiveTask. These classes are abstract; and when you extend you need to override the compute method. If it is a RecursiveAction the compute operation doesn't return any value. Where as in case of RecursiveTask we can return a value. You can relate that with Runnable and Callable.
+
+Submitting the tasks from outside non-fork join clients -
+YourForkJoinTask task = ......;
+ForkJoinPool pool = ForkJoinPool.commonPool();
+
+// (1) Arranges for asynchronous execution of the given task.
+pool.execute(task);
+
+// (2) Invokes the task, waits for completion and returns the
+// result.
+result = pool.invoke(task);
+
+// (3) Submits the task for execution
+pool.submit(task);
+
+// Later to obtain the result in case of (1) and (3).
+Result = task.get();
+Submitting the tasks from with in the fork join computations -
+YourForkJoinSubTask subTask = ......;
+
+// (1) Submit the task for execution
+subTask.fork();
+
+// join - waits for the task to complete the computation
+// and returns its result.
+result = subTask.join();
+
+// (2) Direct approach - invoke the task and wait for result.
+result = subTask.invoke();
+
+
+**Example -**
+
+    import java.util.concurrent.ForkJoinPool;
+    import java.util.concurrent.RecursiveTask;
+    
+    class SearchTask extends RecursiveTask<Integer> {
+    
+        int arr[];
+        int start, end;
+        int searchEle;
+        
+        public SearchTask(int arr[], int start, int end, int searchEle) {
+        this.arr = arr;
+        this.start = start;
+        this.end = end;
+        this.searchEle = searchEle;
+        }
+        
+        @Override
+        protected Integer compute() {
+        System.out.println(Thread.currentThread());
+        int size = end - start + 1;
+        if (size > 3) {
+            int mid = (end + start) / 2;
+            SearchTask task1 = new SearchTask(arr, start, mid, searchEle);
+            SearchTask task2 = new SearchTask(arr, mid + 1, end, searchEle);
+            task1.fork();
+            task2.fork();
+            int result = task1.join() + task2.join();
+            return result;
+        } else {
+            return processSearch();
+        }
+        }
+     
+        private Integer processSearch() {
+        int count = 0;
+        for(int i = start; i <= end; i++) {
+            if (arr[i] == searchEle) {
+            count++;
+            }
+        }
+        return count;
+        }
+    }
+
+    public class Main {
+    
+        public static void main(String[] args) {
+        int arr[] = {6, 2, 6, 4, 5, 6, 7, 8, 6, 10, 11, 6};
+        int searchEle = 6;
+        int start = 0;
+        int end = arr.length - 1;
+            
+        ForkJoinPool pool = ForkJoinPool.commonPool();
+        SearchTask task = new SearchTask(arr, start, end, searchEle);
+        int result = pool.invoke(task);
+            
+        System.out.printf("%d found %d times", searchEle, result);
+        }
+    }
+
+
+=================================================================================================================
+
+
+
+=================================================================================================================
