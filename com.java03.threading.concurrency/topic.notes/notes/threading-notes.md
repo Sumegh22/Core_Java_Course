@@ -1,5 +1,49 @@
 # Notes - Multithreading and Concurrency
 
+## Single Threaded App Example
+
+**Serial Threaded vs Multi-threaded -**
+* Multi-threaded applications normally do parallel processing of tasks where as single threaded applications do one task at a time i.e. If there are two tasks such as T1, T2 they are executed in serial order i.e T1 after T2 or T2 after T1, where as multi threading enables us to execute them simultaneously i.e. T1 along with T2. We can choose single threaded applications when parallel processing is not required example use cases such as simple text editor.
+
+* Below is a simple example for single threaded application, in this the Task need to print 1500 T's and Main is another task which prints 1500 M's. If we execute this in serial order then it is referred as serial execution.
+
+**Serial Execution Example -**
+
+* Some task; here it will print 1500 T's.
+
+
+    class Task {
+    
+        public void doTask() {
+        for(int i=1; i <= 1500; i++) {
+            System.out.print("T");
+        }
+        }
+    }
+
+* Main
+
+      public class Main {
+      
+          public static void main(String[] args) {
+              
+          // Print M's
+          for(int i=1; i <= 1500; i++) {
+              System.out.print("M");
+          }
+              
+          // Call the task to print T's
+          Task t1 = new Task();
+          t1.doTask();
+          }
+      
+      }
+
+When you run the above example you will see 1500 M's first and then followed by 1500 T's.
+
+
+
+===================================================================================================================================
 ### True Parallelism vs Logical Parallelism**
 
 * True Parallelism vs Logical Parallelism
